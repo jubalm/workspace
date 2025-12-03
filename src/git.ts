@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, appendFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { exec, execQuiet, execInteractive } from './exec.js';
-import { info, warning, success, error } from './logger.js';
+import { info, detail, warning, success, error } from './logger.js';
 
 export const WORKTREE_DIR = '.worktree';
 export const DEFAULT_BASE_BRANCH = 'main';
@@ -83,8 +83,19 @@ export function getBranchName(worktreePath: string): string {
   return execQuiet(`cd "${worktreePath}" && git rev-parse --abbrev-ref HEAD`);
 }
 
+export function getBranchInfo(worktreePath: string): { branch: string; tracking?: string } {
+  const branch = getBranchName(worktreePath);
+  const tracking = execQuiet(
+    `cd "${worktreePath}" && git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
+  ).replace(/^origin\//, '');
+
+  return {
+    branch,
+    tracking: tracking && tracking !== '@{u}' ? tracking : undefined,
+  };
+}
+
 export function fetchRemote(): void {
-  info('Fetching latest remote branches...');
   const result = execQuiet('git fetch --quiet origin');
   if (result === '') {
     // Fetch succeeded (no output expected)

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { checkGitRepo } from './git.js';
 import { createWorktree, listWorktrees, removeWorktree, pruneWorktrees } from './commands.js';
-import { error } from './logger.js';
+import { error, setVerbose } from './logger.js';
 import type { CreateWorktreeOptions } from './commands.js';
 
 const program = new Command();
@@ -9,7 +9,8 @@ const program = new Command();
 program
   .name('workspace')
   .description('Easily create isolated workspaces that fit your git workflow — comes with automatic and configurable setup detection. Perfect for AI sandboxed coding and testing.')
-  .version('0.0.1');
+  .version('0.0.1')
+  .option('-v, --verbose', 'Show detailed operation logs');
 
 // Main command: create worktree
 program
@@ -19,6 +20,7 @@ program
   .option('-b, --base <branch>', 'Create new branch from custom base (default: main)')
   .action((branch: string | undefined, options: any) => {
     try {
+      if (options.verbose) setVerbose(true);
       checkGitRepo();
 
       if (!branch) {
@@ -47,8 +49,10 @@ program
   .command('list')
   .alias('ls')
   .description('List all worktrees')
-  .action(() => {
+  .option('-v, --verbose', 'Show detailed operation logs')
+  .action((options: any) => {
     try {
+      if (options.verbose) setVerbose(true);
       checkGitRepo();
       listWorktrees();
     } catch (err) {
@@ -65,8 +69,10 @@ program
   .alias('rm')
   .alias('delete')
   .description('Remove a worktree')
-  .action((name: string) => {
+  .option('-v, --verbose', 'Show detailed operation logs')
+  .action((name: string, options: any) => {
     try {
+      if (options.verbose) setVerbose(true);
       checkGitRepo();
       removeWorktree(name);
     } catch (err) {
@@ -82,8 +88,10 @@ program
   .command('prune')
   .alias('clean')
   .description('Clean up stale worktrees')
-  .action(() => {
+  .option('-v, --verbose', 'Show detailed operation logs')
+  .action((options: any) => {
     try {
+      if (options.verbose) setVerbose(true);
       checkGitRepo();
       pruneWorktrees();
     } catch (err) {

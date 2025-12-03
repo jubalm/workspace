@@ -11,10 +11,11 @@ import {
   createFromRemoteBranch,
   createFromLocalBranch,
   createNewBranch,
+  getBranchInfo,
 } from './git.js';
 import { runSetup, type SetupMode } from './autorun.js';
 import { exec, execQuiet, execInteractive } from './exec.js';
-import { info, warning, success, error } from './logger.js';
+import { info, detail, warning, success, error, createSpinner } from './logger.js';
 
 export interface CreateWorktreeOptions {
   skipSetup?: boolean;
@@ -61,9 +62,6 @@ function handleExistingWorktree(
   dirName: string,
   options: CreateWorktreeOptions
 ): void {
-  info(`Worktree already exists: ${WORKTREE_DIR}/${dirName}`);
-  info('Re-running setup...');
-
   const setupMode: SetupMode = options.skipSetup
     ? 'none'
     : options.setupScript || 'default';
@@ -72,9 +70,14 @@ function handleExistingWorktree(
     process.exit(1);
   }
 
+  const branchInfo = getBranchInfo(worktreePath);
+  const branchDesc = branchInfo.tracking
+    ? `${branchInfo.branch} → ${branchInfo.tracking}`
+    : branchInfo.branch;
+
   console.log('');
-  info('Next steps:');
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
+  detail(`Branch: ${branchDesc}`);
   console.log('');
 }
 
@@ -93,7 +96,6 @@ export function createWorktree(
   }
 
   // Create new worktree
-  info(`Creating worktree for branch: ${branch}`);
   setupPrerequisites(projectRoot);
 
   const resolution = resolveBranch(branch);
@@ -111,8 +113,6 @@ export function createWorktree(
       break;
   }
 
-  info(`Location: ${worktreePath}`);
-
   // Run setup (if not skipped)
   const setupMode: SetupMode = options.skipSetup
     ? 'none'
@@ -122,10 +122,15 @@ export function createWorktree(
     process.exit(1);
   }
 
-  // Show next steps
+  // Show summary
+  const branchInfo = getBranchInfo(worktreePath);
+  const branchDesc = branchInfo.tracking
+    ? `${branchInfo.branch} → ${branchInfo.tracking}`
+    : branchInfo.branch;
+
   console.log('');
-  info('Next steps:');
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
+  detail(`Branch: ${branchDesc}`);
   console.log('');
 }
 
@@ -146,22 +151,22 @@ export function removeWorktree(name: string): void {
   // Get the branch name for this worktree
   const branchName = execQuiet(`cd "${worktreePath}" && git rev-parse --abbrev-ref HEAD`);
 
-  info(`Removing worktree: ${WORKTREE_DIR}/${name}`);
-
+  // Remove worktree and branch
   exec(`git worktree remove "${worktreePath}" --force`);
-  success('Worktree removed!');
 
   // Delete the local branch if it exists
+  let deletedBranch = false;
   if (branchName && branchName !== 'HEAD') {
-    info(`Deleting local branch: ${branchName}`);
     const result = execQuiet(`git branch -D "${branchName}"`);
-    if (result) {
-      success(`Local branch '${branchName}' deleted`);
-    } else {
-      warning(`Could not delete branch '${branchName}' (may not exist or already deleted)`);
-    }
+    deletedBranch = !!result;
   }
 
+  // Show summary
+  console.log('');
+  success(`Removed: ${WORKTREE_DIR}/${name}`);
+  if (deletedBranch) {
+    detail(`Deleted branch: ${branchName}`);
+  }
   console.log('');
   execInteractive('git worktree list');
 }
@@ -177,9 +182,9 @@ export function listWorktrees(): void {
 // Prune worktrees
 
 export function pruneWorktrees(): void {
-  info('Pruning stale worktrees...');
+  info('Pruning stale worktrees');
   execInteractive('git worktree prune -v');
-  success('Prune complete');
+  success('Stale worktrees pruned');
   console.log('');
   listWorktrees();
 }
