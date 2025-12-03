@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.local
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# git worktrees
+.worktree/
