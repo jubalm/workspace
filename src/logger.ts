@@ -1,27 +1,23 @@
 import chalk from 'chalk';
 
-let quietMode = false;
+let verboseMode = false;
 
-export function setQuietMode(quiet: boolean): void {
-  quietMode = quiet;
+export function setVerbose(verbose: boolean): void {
+  verboseMode = verbose;
 }
 
 export function info(message: string): void {
-  if (!quietMode) {
+  if (verboseMode) {
     console.log(chalk.blue('ℹ'), message);
   }
 }
 
 export function success(message: string): void {
-  if (!quietMode) {
-    console.log(chalk.green('✓'), message);
-  }
+  console.log(chalk.green('✓'), message);
 }
 
 export function warning(message: string): void {
-  if (!quietMode) {
-    console.log(chalk.yellow('⚠'), message);
-  }
+  console.log(chalk.yellow('⚠'), message);
 }
 
 export function error(message: string): void {

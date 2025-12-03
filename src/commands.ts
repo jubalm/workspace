@@ -15,7 +15,7 @@ import {
 } from './git.js';
 import { runSetup, type SetupMode } from './autorun.js';
 import { exec, execQuiet, execInteractive } from './exec.js';
-import { info, warning, success, error, createSpinner, setQuietMode } from './logger.js';
+import { info, warning, success, error, createSpinner } from './logger.js';
 
 export interface CreateWorktreeOptions {
   skipSetup?: boolean;
@@ -62,8 +62,6 @@ function handleExistingWorktree(
   dirName: string,
   options: CreateWorktreeOptions
 ): void {
-  setQuietMode(true);
-
   const setupMode: SetupMode = options.skipSetup
     ? 'none'
     : options.setupScript || 'default';
@@ -72,7 +70,6 @@ function handleExistingWorktree(
     process.exit(1);
   }
 
-  setQuietMode(false);
   const branchInfo = getBranchInfo(worktreePath);
   const branchDesc = branchInfo.tracking
     ? `${branchInfo.branch} → ${branchInfo.tracking}`
@@ -101,8 +98,7 @@ export function createWorktree(
     return;
   }
 
-  // Create new worktree (suppress intermediate logs)
-  setQuietMode(true);
+  // Create new worktree
   setupPrerequisites(projectRoot);
 
   const resolution = resolveBranch(branch);
@@ -130,7 +126,6 @@ export function createWorktree(
   }
 
   // Show summary
-  setQuietMode(false);
   const branchInfo = getBranchInfo(worktreePath);
   const branchDesc = branchInfo.tracking
     ? `${branchInfo.branch} → ${branchInfo.tracking}`
@@ -162,8 +157,7 @@ export function removeWorktree(name: string): void {
   // Get the branch name for this worktree
   const branchName = execQuiet(`cd "${worktreePath}" && git rev-parse --abbrev-ref HEAD`);
 
-  // Remove worktree and branch (suppress logs)
-  setQuietMode(true);
+  // Remove worktree and branch
   exec(`git worktree remove "${worktreePath}" --force`);
 
   // Delete the local branch if it exists
@@ -172,7 +166,6 @@ export function removeWorktree(name: string): void {
     const result = execQuiet(`git branch -D "${branchName}"`);
     deletedBranch = !!result;
   }
-  setQuietMode(false);
 
   // Show summary
   console.log('');
