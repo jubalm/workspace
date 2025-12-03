@@ -96,7 +96,6 @@ export function runSetup(worktreePath: string, setupMode: SetupMode): boolean {
 
   if (setupMode === 'default') {
     // Auto-detect setup script
-    info('Checking for setup script...');
     setupScript = detectSetupScript(worktreePath);
 
     if (!setupScript) {
@@ -128,9 +127,8 @@ export function runSetup(worktreePath: string, setupMode: SetupMode): boolean {
 
   // Execute setup script
   console.log('');
-  info('Running setup...');
+  info(`Running setup script: ${setupScript}`);
   const startTime = Date.now();
-  info(`Executing: ${setupScript}`);
   try {
     execSync(`"${setupScript}" "${worktreePath}"`, {
       stdio: 'inherit',

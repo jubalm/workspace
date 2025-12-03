@@ -12,14 +12,24 @@ import { execSync } from "node:child_process";
 
 // src/logger.ts
 import chalk from "chalk";
+var quietMode = false;
+function setQuietMode(quiet) {
+  quietMode = quiet;
+}
 function info(message) {
-  console.log(chalk.blue("\u2139"), message);
+  if (!quietMode) {
+    console.log(chalk.blue("\u2139"), message);
+  }
 }
 function success(message) {
-  console.log(chalk.green("\u2713"), message);
+  if (!quietMode) {
+    console.log(chalk.green("\u2713"), message);
+  }
 }
 function warning(message) {
-  console.log(chalk.yellow("\u26A0"), message);
+  if (!quietMode) {
+    console.log(chalk.yellow("\u26A0"), message);
+  }
 }
 function error(message) {
   console.error(chalk.red("\u2717"), message);
@@ -120,8 +130,20 @@ function branchExists(branch) {
 function getBranchRef(branch) {
   return execQuiet(`git rev-parse --verify ${branch}`);
 }
+function getBranchName(worktreePath) {
+  return execQuiet(`cd "${worktreePath}" && git rev-parse --abbrev-ref HEAD`);
+}
+function getBranchInfo(worktreePath) {
+  const branch = getBranchName(worktreePath);
+  const tracking = execQuiet(
+    `cd "${worktreePath}" && git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null`
+  ).replace(/^origin\//, "");
+  return {
+    branch,
+    tracking: tracking && tracking !== "@{u}" ? tracking : void 0
+  };
+}
 function fetchRemote() {
-  info("Fetching latest remote branches...");
   const result = execQuiet("git fetch --quiet origin");
   if (result === "") {
     return;
@@ -272,7 +294,6 @@ function runSetup(worktreePath, setupMode) {
   console.log("");
   let setupScript;
   if (setupMode === "default") {
-    info("Checking for setup script...");
     setupScript = detectSetupScript(worktreePath);
     if (!setupScript) {
       info("No setup script found (checked: script/setup, script/bootstrap, bin/setup, setup.sh, etc.)");
@@ -295,9 +316,8 @@ function runSetup(worktreePath, setupMode) {
     return true;
   }
   console.log("");
-  info("Running setup...");
+  info(`Running setup script: ${setupScript}`);
   const startTime = Date.now();
-  info(`Executing: ${setupScript}`);
   try {
     execSync2(`"${setupScript}" "${worktreePath}"`, {
       stdio: "inherit"
@@ -333,12 +353,17 @@ function setupPrerequisites(projectRoot) {
   fetchRemote();
 }
 function handleExistingWorktree(worktreePath, dirName, options) {
-  info(`Worktree already exists: ${WORKTREE_DIR}/${dirName}`);
-  info("Re-running setup...");
+  setQuietMode(true);
   const setupMode = options.skipSetup ? "none" : options.setupScript || "default";
   if (!runSetup(worktreePath, setupMode)) {
     process.exit(1);
   }
+  setQuietMode(false);
+  const branchInfo = getBranchInfo(worktreePath);
+  const branchDesc = branchInfo.tracking ? `${branchInfo.branch} \u2192 ${branchInfo.tracking}` : branchInfo.branch;
+  console.log("");
+  success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
+  info(`Branch: ${branchDesc}`);
   console.log("");
   info("Next steps:");
   info(`  cd ${WORKTREE_DIR}/${dirName}`);
@@ -350,7 +375,7 @@ function createWorktree(branch, options) {
     handleExistingWorktree(worktreePath, dirName, options);
     return;
   }
-  info(`Creating worktree for branch: ${branch}`);
+  setQuietMode(true);
   setupPrerequisites(projectRoot);
   const resolution = resolveBranch(branch);
   switch (resolution.type) {
@@ -364,11 +389,16 @@ function createWorktree(branch, options) {
       createNewBranch(worktreePath, resolution, options.baseBranch);
       break;
   }
-  info(`Location: ${worktreePath}`);
   const setupMode = options.skipSetup ? "none" : options.setupScript || "default";
   if (!runSetup(worktreePath, setupMode)) {
     process.exit(1);
   }
+  setQuietMode(false);
+  const branchInfo = getBranchInfo(worktreePath);
+  const branchDesc = branchInfo.tracking ? `${branchInfo.branch} \u2192 ${branchInfo.tracking}` : branchInfo.branch;
+  console.log("");
+  success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
+  info(`Branch: ${branchDesc}`);
   console.log("");
   info("Next steps:");
   info(`  cd ${WORKTREE_DIR}/${dirName}`);
@@ -384,17 +414,18 @@ function removeWorktree(name) {
     process.exit(1);
   }
   const branchName = execQuiet(`cd "${worktreePath}" && git rev-parse --abbrev-ref HEAD`);
-  info(`Removing worktree: ${WORKTREE_DIR}/${name}`);
+  setQuietMode(true);
   exec(`git worktree remove "${worktreePath}" --force`);
-  success("Worktree removed!");
+  let deletedBranch = false;
   if (branchName && branchName !== "HEAD") {
-    info(`Deleting local branch: ${branchName}`);
     const result = execQuiet(`git branch -D "${branchName}"`);
-    if (result) {
-      success(`Local branch '${branchName}' deleted`);
-    } else {
-      warning(`Could not delete branch '${branchName}' (may not exist or already deleted)`);
-    }
+    deletedBranch = !!result;
+  }
+  setQuietMode(false);
+  console.log("");
+  success(`Removed: ${WORKTREE_DIR}/${name}`);
+  if (deletedBranch) {
+    info(`Deleted branch: ${branchName}`);
   }
   console.log("");
   execInteractive("git worktree list");
@@ -405,9 +436,9 @@ function listWorktrees() {
   execInteractive("git worktree list");
 }
 function pruneWorktrees() {
-  info("Pruning stale worktrees...");
+  info("Pruning stale worktrees");
   execInteractive("git worktree prune -v");
-  success("Prune complete");
+  success("Stale worktrees pruned");
   console.log("");
   listWorktrees();
 }
