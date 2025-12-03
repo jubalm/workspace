@@ -46,22 +46,22 @@ export function resolveBranch(branch: string): BranchResolution {
 
   // Check remote, then local, then create new
   if (branchExists(remoteCandidate)) {
-    detail(`Found remote branch: ${remoteCandidate}`);
+    info(`Found remote branch: ${remoteCandidate}`);
     return {
       type: 'remote',
       foundBranch: remoteCandidate,
       cleanBranchName,
     };
   } else if (branchExists(cleanBranchName)) {
-    detail(`Found local branch: ${cleanBranchName}`);
+    info(`Found local branch: ${cleanBranchName}`);
     return {
       type: 'local',
       foundBranch: cleanBranchName,
       cleanBranchName,
     };
   } else {
-    detail(`Branch '${cleanBranchName}' not found on remote or locally`);
-    detail('Will create new branch from base');
+    info(`Branch '${cleanBranchName}' not found on remote or locally`);
+    info('Will create new branch from base');
     return {
       type: 'new',
       foundBranch: '',
@@ -139,11 +139,11 @@ function createWorktreeWithExistingBranch(
   branchName: string,
   remoteBranch: string
 ): void {
-  detail(`Using existing local branch: ${branchName}`);
+  info(`Using existing local branch: ${branchName}`);
   exec(`git worktree add "${worktreePath}" "${branchName}"`);
   ensureTracking(worktreePath, branchName, remoteBranch);
   success('Worktree created!');
-  detail(`Branch: ${branchName} (tracking ${remoteBranch})`);
+  info(`Branch: ${branchName} (tracking ${remoteBranch})`);
 }
 
 function createWorktreeWithNewTrackingBranch(
@@ -151,11 +151,11 @@ function createWorktreeWithNewTrackingBranch(
   branchName: string,
   remoteBranch: string
 ): void {
-  detail(`Creating local tracking branch: ${branchName} -> ${remoteBranch}`);
+  info(`Creating local tracking branch: ${branchName} -> ${remoteBranch}`);
   exec(`git worktree add -b "${branchName}" "${worktreePath}" "${remoteBranch}"`);
   exec(`cd "${worktreePath}" && git branch --set-upstream-to="${remoteBranch}"`);
   success('Worktree created!');
-  detail(`Branch: ${branchName} (tracking ${remoteBranch})`);
+  info(`Branch: ${branchName} (tracking ${remoteBranch})`);
 }
 
 export function createFromRemoteBranch(
@@ -175,10 +175,10 @@ export function createFromLocalBranch(
   worktreePath: string,
   resolution: BranchResolution
 ): void {
-  detail(`Using existing local branch: ${resolution.foundBranch}`);
+  info(`Using existing local branch: ${resolution.foundBranch}`);
   exec(`git worktree add "${worktreePath}" "${resolution.foundBranch}"`);
   success('Worktree created!');
-  detail(`Branch: ${resolution.foundBranch}`);
+  info(`Branch: ${resolution.foundBranch}`);
 }
 
 export function createNewBranch(
@@ -191,17 +191,17 @@ export function createNewBranch(
   // Verify base branch exists
   if (!branchExists(baseBranch)) {
     error(`Base branch not found: ${baseBranch}`);
-    detail('Available branches:');
+    info('Available branches:');
     execInteractive('git branch -a | head -20');
     process.exit(1);
   }
 
   const branchRef = getBranchRef(baseBranch);
-  detail(`Creating new branch '${resolution.cleanBranchName}' from: ${baseBranch}`);
+  info(`Creating new branch '${resolution.cleanBranchName}' from: ${baseBranch}`);
 
   exec(`git worktree add -b "${resolution.cleanBranchName}" "${worktreePath}" "${branchRef}"`);
   success('Worktree created!');
-  detail(`Branch: ${resolution.cleanBranchName} (new from ${baseBranch})`);
+  info(`Branch: ${resolution.cleanBranchName} (new from ${baseBranch})`);
 }
 
 // Gitignore management

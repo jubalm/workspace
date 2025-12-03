@@ -79,9 +79,6 @@ function handleExistingWorktree(
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
   detail(`Branch: ${branchDesc}`);
   console.log('');
-  info('Next steps:');
-  detail(`cd ${WORKTREE_DIR}/${dirName}`);
-  console.log('');
 }
 
 // Main command: create worktree
@@ -134,9 +131,6 @@ export function createWorktree(
   console.log('');
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
   detail(`Branch: ${branchDesc}`);
-  console.log('');
-  info('Next steps:');
-  detail(`cd ${WORKTREE_DIR}/${dirName}`);
   console.log('');
 }
 
