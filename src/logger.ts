@@ -12,6 +12,11 @@ export function info(message: string): void {
   }
 }
 
+// Indented detail lines (no icon, always shown)
+export function detail(message: string): void {
+  console.log(`  ${message}`);
+}
+
 export function success(message: string): void {
   console.log(chalk.green('✓'), message);
 }

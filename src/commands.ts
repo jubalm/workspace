@@ -15,7 +15,7 @@ import {
 } from './git.js';
 import { runSetup, type SetupMode } from './autorun.js';
 import { exec, execQuiet, execInteractive } from './exec.js';
-import { info, warning, success, error, createSpinner } from './logger.js';
+import { info, detail, warning, success, error, createSpinner } from './logger.js';
 
 export interface CreateWorktreeOptions {
   skipSetup?: boolean;
@@ -77,10 +77,10 @@ function handleExistingWorktree(
 
   console.log('');
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
-  info(`Branch: ${branchDesc}`);
+  detail(`Branch: ${branchDesc}`);
   console.log('');
   info('Next steps:');
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  detail(`cd ${WORKTREE_DIR}/${dirName}`);
   console.log('');
 }
 
@@ -133,10 +133,10 @@ export function createWorktree(
 
   console.log('');
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
-  info(`Branch: ${branchDesc}`);
+  detail(`Branch: ${branchDesc}`);
   console.log('');
   info('Next steps:');
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  detail(`cd ${WORKTREE_DIR}/${dirName}`);
   console.log('');
 }
 
@@ -171,7 +171,7 @@ export function removeWorktree(name: string): void {
   console.log('');
   success(`Removed: ${WORKTREE_DIR}/${name}`);
   if (deletedBranch) {
-    info(`Deleted branch: ${branchName}`);
+    detail(`Deleted branch: ${branchName}`);
   }
   console.log('');
   execInteractive('git worktree list');

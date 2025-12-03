@@ -21,6 +21,9 @@ function info(message) {
     console.log(chalk.blue("\u2139"), message);
   }
 }
+function detail(message) {
+  console.log(`  ${message}`);
+}
 function success(message) {
   console.log(chalk.green("\u2713"), message);
 }
@@ -96,22 +99,22 @@ function resolveBranch(branch) {
     cleanBranchName = branch;
   }
   if (branchExists(remoteCandidate)) {
-    info(`Found remote branch: ${remoteCandidate}`);
+    detail(`Found remote branch: ${remoteCandidate}`);
     return {
       type: "remote",
       foundBranch: remoteCandidate,
       cleanBranchName
     };
   } else if (branchExists(cleanBranchName)) {
-    info(`Found local branch: ${cleanBranchName}`);
+    detail(`Found local branch: ${cleanBranchName}`);
     return {
       type: "local",
       foundBranch: cleanBranchName,
       cleanBranchName
     };
   } else {
-    info(`Branch '${cleanBranchName}' not found on remote or locally`);
-    info("Will create new branch from base");
+    detail(`Branch '${cleanBranchName}' not found on remote or locally`);
+    detail("Will create new branch from base");
     return {
       type: "new",
       foundBranch: "",
@@ -165,18 +168,18 @@ function ensureTracking(worktreePath, branchName, remoteBranch) {
   }
 }
 function createWorktreeWithExistingBranch(worktreePath, branchName, remoteBranch) {
-  info(`Using existing local branch: ${branchName}`);
+  detail(`Using existing local branch: ${branchName}`);
   exec(`git worktree add "${worktreePath}" "${branchName}"`);
   ensureTracking(worktreePath, branchName, remoteBranch);
   success("Worktree created!");
-  info(`Branch: ${branchName} (tracking ${remoteBranch})`);
+  detail(`Branch: ${branchName} (tracking ${remoteBranch})`);
 }
 function createWorktreeWithNewTrackingBranch(worktreePath, branchName, remoteBranch) {
-  info(`Creating local tracking branch: ${branchName} -> ${remoteBranch}`);
+  detail(`Creating local tracking branch: ${branchName} -> ${remoteBranch}`);
   exec(`git worktree add -b "${branchName}" "${worktreePath}" "${remoteBranch}"`);
   exec(`cd "${worktreePath}" && git branch --set-upstream-to="${remoteBranch}"`);
   success("Worktree created!");
-  info(`Branch: ${branchName} (tracking ${remoteBranch})`);
+  detail(`Branch: ${branchName} (tracking ${remoteBranch})`);
 }
 function createFromRemoteBranch(worktreePath, resolution) {
   const trackingBranchName = resolution.foundBranch.replace("origin/", "");
@@ -187,24 +190,24 @@ function createFromRemoteBranch(worktreePath, resolution) {
   }
 }
 function createFromLocalBranch(worktreePath, resolution) {
-  info(`Using existing local branch: ${resolution.foundBranch}`);
+  detail(`Using existing local branch: ${resolution.foundBranch}`);
   exec(`git worktree add "${worktreePath}" "${resolution.foundBranch}"`);
   success("Worktree created!");
-  info(`Branch: ${resolution.foundBranch}`);
+  detail(`Branch: ${resolution.foundBranch}`);
 }
 function createNewBranch(worktreePath, resolution, baseBranchOption) {
   const baseBranch = baseBranchOption || DEFAULT_BASE_BRANCH;
   if (!branchExists(baseBranch)) {
     error(`Base branch not found: ${baseBranch}`);
-    info("Available branches:");
+    detail("Available branches:");
     execInteractive("git branch -a | head -20");
     process.exit(1);
   }
   const branchRef = getBranchRef(baseBranch);
-  info(`Creating new branch '${resolution.cleanBranchName}' from: ${baseBranch}`);
+  detail(`Creating new branch '${resolution.cleanBranchName}' from: ${baseBranch}`);
   exec(`git worktree add -b "${resolution.cleanBranchName}" "${worktreePath}" "${branchRef}"`);
   success("Worktree created!");
-  info(`Branch: ${resolution.cleanBranchName} (new from ${baseBranch})`);
+  detail(`Branch: ${resolution.cleanBranchName} (new from ${baseBranch})`);
 }
 function ensureGitignore(projectRoot, worktreeDir) {
   const gitignorePath = join(projectRoot, ".gitignore");
@@ -357,10 +360,10 @@ function handleExistingWorktree(worktreePath, dirName, options) {
   const branchDesc = branchInfo.tracking ? `${branchInfo.branch} \u2192 ${branchInfo.tracking}` : branchInfo.branch;
   console.log("");
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
-  info(`Branch: ${branchDesc}`);
+  detail(`Branch: ${branchDesc}`);
   console.log("");
   info("Next steps:");
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  detail(`cd ${WORKTREE_DIR}/${dirName}`);
   console.log("");
 }
 function createWorktree(branch, options) {
@@ -390,10 +393,10 @@ function createWorktree(branch, options) {
   const branchDesc = branchInfo.tracking ? `${branchInfo.branch} \u2192 ${branchInfo.tracking}` : branchInfo.branch;
   console.log("");
   success(`Worktree ready: ${WORKTREE_DIR}/${dirName}`);
-  info(`Branch: ${branchDesc}`);
+  detail(`Branch: ${branchDesc}`);
   console.log("");
   info("Next steps:");
-  info(`  cd ${WORKTREE_DIR}/${dirName}`);
+  detail(`cd ${WORKTREE_DIR}/${dirName}`);
   console.log("");
 }
 function removeWorktree(name) {
@@ -415,7 +418,7 @@ function removeWorktree(name) {
   console.log("");
   success(`Removed: ${WORKTREE_DIR}/${name}`);
   if (deletedBranch) {
-    info(`Deleted branch: ${branchName}`);
+    detail(`Deleted branch: ${branchName}`);
   }
   console.log("");
   execInteractive("git worktree list");
