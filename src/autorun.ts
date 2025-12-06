@@ -130,8 +130,12 @@ export function runSetup(worktreePath: string, setupMode: SetupMode): boolean {
   info(`Running setup script: ${setupScript}`);
   const startTime = Date.now();
   try {
-    execSync(`"${setupScript}" "${worktreePath}"`, {
+    execSync(`"${setupScript}"`, {
       stdio: 'inherit',
+      env: {
+        ...process.env,
+        WORKSPACE_DIR: worktreePath,
+      },
     });
 
     const duration = Math.floor((Date.now() - startTime) / 1000);

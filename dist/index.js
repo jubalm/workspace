@@ -318,8 +318,12 @@ function runSetup(worktreePath, setupMode) {
   info(`Running setup script: ${setupScript}`);
   const startTime = Date.now();
   try {
-    execSync2(`"${setupScript}" "${worktreePath}"`, {
-      stdio: "inherit"
+    execSync2(`"${setupScript}"`, {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        WORKSPACE_DIR: worktreePath
+      }
     });
     const duration = Math.floor((Date.now() - startTime) / 1e3);
     success(`Setup complete! (${duration}s)`);

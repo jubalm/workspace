@@ -4,7 +4,8 @@
   "description": "Easily create isolated workspaces that fit your git workflow — comes with automatic and configurable setup detection. Perfect for AI sandboxed coding and testing.",
   "type": "module",
   "bin": {
-    "workspace": "./dist/index.js"
+    "workspace": "./dist/index.js",
+    "ws": "./dist/index.js"
   },
   "files": [
     "dist"

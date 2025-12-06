@@ -258,7 +258,7 @@ npx @jubalm/workspace --help
 **Setup script not running:**
 - Check if it exists: `ls -l lib/setup.sh`
 - Check permissions: `chmod +x lib/setup.sh`
-- Test directly: `bash lib/setup.sh /path/to/worktree`
+- Test directly: `WORKSPACE_DIR=/path/to/worktree lib/setup.sh`
 
 **Type errors:**
 - Check imports have `.js` extension (required for ESM)

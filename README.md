@@ -35,6 +35,11 @@ npx jubalm/workspace remove feature-new-ui
 npx jubalm/workspace help
 ```
 
+**Shorthand**: Use `ws` instead of `workspace` for faster typing:
+```bash
+npx jubalm/ws feature/new-ui
+```
+
 ## Usage
 
 ### Create a Worktree
@@ -131,7 +136,7 @@ The first executable script found will run automatically.
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$WORKSPACE_DIR"
 npm ci
 cp .env.example .env 2>/dev/null || true
 echo "✓ Setup complete"
@@ -142,6 +147,7 @@ echo "✓ Setup complete"
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$WORKSPACE_DIR"
 bundle install
 bin/rails db:setup
 echo "✓ Setup complete"
@@ -152,6 +158,7 @@ echo "✓ Setup complete"
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$WORKSPACE_DIR"
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -176,7 +183,7 @@ Your setup script must:
 - Exit 0 on success, non-zero on failure
 - Handle being run multiple times (idempotent)
 
-The worktree path is passed as the first argument: `$1`
+Access the worktree path via `$WORKSPACE_DIR` environment variable
 
 ## Workflows
 
