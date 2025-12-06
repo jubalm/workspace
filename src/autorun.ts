@@ -132,6 +132,7 @@ export function runSetup(worktreePath: string, setupMode: SetupMode): boolean {
   try {
     execSync(`"${setupScript}"`, {
       stdio: 'inherit',
+      cwd: worktreePath,
       env: {
         ...process.env,
         WORKSPACE_DIR: worktreePath,

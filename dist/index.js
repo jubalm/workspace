@@ -320,6 +320,7 @@ function runSetup(worktreePath, setupMode) {
   try {
     execSync2(`"${setupScript}"`, {
       stdio: "inherit",
+      cwd: worktreePath,
       env: {
         ...process.env,
         WORKSPACE_DIR: worktreePath
