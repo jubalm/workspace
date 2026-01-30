@@ -103,9 +103,9 @@ npx jubalm/workspace feature/new -b prod   # Creates from prod instead of main
 Branch names are normalized for safe directory names:
 
 ```
-origin/feature/auth    → .worktree/feature-auth
-claude/quick-fix       → .worktree/quick-fix
-hotfix/bug-123         → .worktree/bug-123
+origin/feature/auth    → .worktreess/feature-auth
+claude/quick-fix       → .worktreess/quick-fix
+hotfix/bug-123         → .worktreess/bug-123
 ```
 
 Prefixes stripped: `origin/`, `remotes/origin/`, `claude/`, `remotes/claude/`
@@ -192,7 +192,7 @@ Access the worktree path via `$WORKSPACE_DIR` environment variable
 ```bash
 # Create and navigate
 npx jubalm/workspace feature/dashboard
-cd .worktree/feature-dashboard
+cd .worktreess/feature-dashboard
 
 # ... make changes, commit, push ...
 
@@ -205,7 +205,7 @@ npx jubalm/workspace remove feature-dashboard
 ```bash
 # Check out a PR branch
 npx jubalm/workspace origin/pull/123/head
-cd .worktree/pull-123-head
+cd .worktreess/pull-123-head
 
 # Review the code in isolation
 # Cleanup when done
@@ -229,7 +229,7 @@ npx jubalm/workspace list
 ```bash
 # Create from production branch
 npx jubalm/workspace hotfix/critical-bug -b production
-cd .worktree/critical-bug
+cd .worktreess/critical-bug
 
 # Fix and test
 # Then create PR and cleanup
@@ -238,9 +238,20 @@ npx jubalm/workspace remove critical-bug
 
 ## Configuration
 
-- **Worktree directory:** `.worktree/` (auto-created, must be in `.gitignore`)
+- **Worktree directory:** `.worktrees/` (auto-created, must be in `.gitignore`)
 - **Default base branch:** `main` (override with `-b`)
 - **Default setup script:** `./lib/setup.sh`
+
+### Migration from v0.0.x
+
+If upgrading from v0.0.x, the worktree directory has been renamed from `.worktree/` to `.worktrees/`:
+
+1. Remove old worktrees: `npx jubalm/workspace remove <name>` for each
+2. Delete old directory: `rm -rf .worktree`
+3. Update `.gitignore` to use `.worktrees/` instead of `.worktree/`
+4. Recreate worktrees as needed
+
+Your git configuration is unaffected — this is purely a directory naming change.
 
 ## Examples
 
@@ -315,7 +326,7 @@ npx jubalm/workspace feature/branch -n
 
 If removal fails:
 ```bash
-rm -rf .worktree/<name>
+rm -rf .worktreess/<name>
 git worktree prune
 ```
 
@@ -336,7 +347,7 @@ A: Yes! Each worktree is independent. Setup handles isolation.
 **Q: Can I use the same branch in multiple worktrees?**
 A: No. Git prevents checking out the same branch twice.
 
-**Q: Can I move the `.worktree` directory?**
+**Q: Can I move the `.worktrees` directory?**
 A: Yes, but worktrees might break. Better to remove and recreate.
 
 **Q: Does setup run on existing worktrees?**

@@ -74,7 +74,7 @@ function execInteractive(command) {
 }
 
 // src/git.ts
-var WORKTREE_DIR = ".worktree";
+var WORKTREE_DIR = ".worktrees";
 var DEFAULT_BASE_BRANCH = "main";
 function checkGitRepo() {
   const result = execQuiet("git rev-parse --git-dir");

@@ -12,4 +12,4 @@ dist/
 *.iml
 
 # git worktrees
-.worktree/
+.worktrees/

@@ -1,6 +1,6 @@
 {
   "name": "workspace",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Easily create isolated workspaces that fit your git workflow — comes with automatic and configurable setup detection. Perfect for AI sandboxed coding and testing.",
   "type": "module",
   "bin": {

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { exec, execQuiet, execInteractive } from './exec.js';
 import { info, detail, warning, success, error } from './logger.js';
 
-export const WORKTREE_DIR = '.worktree';
+export const WORKTREE_DIR = '.worktrees';
 export const DEFAULT_BASE_BRANCH = 'main';
 
 export interface BranchResolution {

@@ -184,7 +184,7 @@ The CLI automatically detects setup scripts using industry-standard patterns:
 ## Common Gotchas
 
 - ❌ Don't hardcode paths - use `git rev-parse --show-toplevel`
-- ❌ Don't assume `.worktree` exists - create it with `mkdir -p`
+- ❌ Don't assume `.worktrees` exists - create it with `mkdir -p`
 - ⚠️ Setup scripts must be executable (`chmod +x`)
 - ⚠️ Setup script path can be relative or absolute
 - ⚠️ Always fetch latest remote branches before branch resolution
